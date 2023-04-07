@@ -9,8 +9,11 @@ Back-end: a nodejs web server.
 
 ### pnpm
 install pnpm at global: `npm i -g pnpm`
+
 update to the latest pnpm: `npm i -g pnpm@latest`
+
 use pnpm to manage the packages: `pnpm i`
+
 
 ## Available Scripts
 
@@ -59,14 +62,21 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 
-# create .env from the .env.example
+### .env
+create .env from the .env.example
 store the environment variables in .env
 
 ### Run the nodejs web server:
-### `npm run chatGPTWebApp` to start the nodejs ChatGPT web app
-### `npm run myTestWebServer` to start the testing nodejs web server
+`npm run chatGPTWebApp` to start the nodejs ChatGPT web app
 
-### load the web app from http://localhost:5000
+`npm run myTestWebServer` to start the testing nodejs web server
+
+
+### test the web app
+load the web app from http://localhost:5000
+
 ping and test the web app:
+
 http://localhost:5000/ping
+
 http://locahost:5000/test
