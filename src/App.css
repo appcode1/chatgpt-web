@@ -1,0 +1,50 @@
+.App {
+  min-width: 22rem;
+}
+
+.signin-box {
+  width: 18rem;
+  margin: 3rem auto;
+  border: 1px solid #786ffa;
+  border-radius: 0.25rem;
+}
+.title {
+  border-bottom: 2px solid #786ffa;
+}
+.app-header {
+  background-color: #282c34;
+  display: flex;
+  justify-content:space-between;
+  font-size: 1rem;
+  color: white;
+  padding-left: 0.5rem;
+  padding-right:0.5rem;
+}
+.app-main {
+  height: calc(100vh - 6rem);
+  border: 1px solid #786ffa;
+  border-radius: 0.25rem;  
+  overflow-y: auto;
+  margin: 0.25rem;
+  padding: 0.25rem;
+}
+.app-footer {
+  padding: 0.25rem;
+  background-color: #f5f0f0;
+}
+
+.question, .answer {
+  font-weight: 400;
+  color: #0d6efd;
+}
+.chatbot {
+  width: 2rem;
+  height: 2rem;
+}
+.status {
+  color: #6c757d;
+  font-size: .8rem;
+}
+.fw-08 {
+  font-size:0.8rem;
+}

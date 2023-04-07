@@ -1,0 +1,20 @@
+{
+    "chatGptClient": {
+        "openaiApiKey":"fdfdsfdsafdsfds"
+    },
+    "bingAiClient": {
+        "userToken":"fdasfdafd3432423s"
+    },
+    "chatGptBrowserClient": {
+        "reverseProxyUrl": "https://bypass.churchless.tech/api/conversation",
+        "accessToken": "fdsafdafdsec3r43v",
+        "debug": false
+    },
+    "apiOptions": {
+        "clientToUse": "chatgpt"
+    },
+    "cliOptions": {
+    },
+
+    "whiteList": ["public", "user01", "user02", "xbq"]
+}
