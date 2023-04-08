@@ -94,7 +94,7 @@ function App() {
       if(temp!=''){
         temp += '\r\n';
       }
-      output +=`${a.ts}\r\nYou: ${a.q}\r\n${temp}Bot: ${a.text}\r\n\r\n`;
+      output +=`${a.ts}\r\nYou: ${a.q}\r\n${temp}${a.bot ? a.bot : 'Bot'}: ${a.text}\r\n\r\n`;
     });
     var total = conversation.filter(c => c.usage && c.usage.total_tokens).map(o=>o.usage.total_tokens).reduce((a,b)=>a+b, 0);
     if(total && total>0){
