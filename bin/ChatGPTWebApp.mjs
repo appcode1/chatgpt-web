@@ -196,8 +196,7 @@ server.listen({
 
 console.log(`[ChatGPT Web App] is running at http://${settings.apiOptions.host}:${settings.apiOptions.port}`)
 
-server.get('/ping', async () => (new Date()).toString());
-server.get("/ip", async (request) => request.ip);
+server.get('/ping', async (request) => `server time: ${(new Date()).toString()}\n\n\nclient ip: ${request.ip}`);
 
 //------------/test---------------------------
 // server.get('/test', async (request, reply) => {

@@ -59,8 +59,7 @@ start();
 
 
 //server.get('/ping', () => Date.now().toString());
-server.get('/ping', async () => (new Date()).toString());
-server.get("/ip", async (request) => request.ip);
+server.get('/ping', async (request) => `server time: ${(new Date()).toString()}\n\n\nclient ip: ${request.ip}`);
 
 //------------/test---------------------------
 server.get('/test', async (request, reply) => {
