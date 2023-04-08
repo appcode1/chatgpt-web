@@ -149,6 +149,7 @@ server.post('/conversation', async (request, reply) => {
 					clientId: apiResponse.clientId,
 					invocationId: apiResponse.invocationId,
 					text: apiResponse.response,
+					suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
 				};
 				break;
 			default:

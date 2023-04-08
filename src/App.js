@@ -12,6 +12,7 @@ function App() {
   const [conversation, setConversation] = useState([]);
   const [timeoutId, setTimeoutId] = useState(null);
   const [totalTokens, setTotalTokens] = useState(0); 
+  const [suggestedResponses, setSuggestedResponses] = useState(null);
 
   const mainDiv = document.querySelector('#main');
   const scrollToBottom = () => {
@@ -102,12 +103,19 @@ function App() {
     }
     downloadTextFile(output, `chat_${formatTime(new Date())}.txt`);
   };
+  const clickSuggestion = (s) => {
+    askQuestion(s);
+  };
   const sendChat = () => {
     if(isBlank(question)) return;
-
+    askQuestion(question);
+    setQuestion('');
+  };
+  const askQuestion = (ask) => {
+    setSuggestedResponses(null);
     const timeStamp = getTimeStamp();
-    conversation.push({ts: timeStamp, q: question, text: 'waiting for reply...'});
-    const requestData = {ts: timeStamp, q: question,
+    conversation.push({ts: timeStamp, q: ask, text: 'waiting for reply...'});
+    const requestData = {ts: timeStamp, q: ask,
           lastMsgId: lastReply.id, //chatgpt
           lastMsgConversationId: lastReply.conversationId, //chatgpt, bing
           conversationSignature: lastReply.conversationSignature, //bing
@@ -135,6 +143,10 @@ function App() {
             data.tt=timeStamp2;
             const theIndex = conversation.findIndex(c => c.ts == data.ts);
             if(theIndex>=0){
+              if(data.suggestedResponses){
+                setSuggestedResponses(data.suggestedResponses);
+                delete data.suggestedResponses;
+              }
               conversation[theIndex] = data;
               saveData(userId, conversation);
               var total = conversation.filter(c => c.usage && c.usage.total_tokens).map(o=>o.usage.total_tokens).reduce((a,b)=>a+b, 0);
@@ -183,7 +195,6 @@ function App() {
       }
     });
 
-    setQuestion('');
     scrollToView();
   };
   const createMarkup = (text, bot) => {
@@ -257,6 +268,9 @@ function App() {
       </div>
       <div className='app-main' id='main'>
         <MyChat />
+        {suggestedResponses && <div>
+          <ul className='no-bullets fw-08'>{suggestedResponses.map(a=><li className='my-1'><button className='suggested-box px-2' type='button' onClick={()=>clickSuggestion(a)}>{a}</button></li>)}</ul>
+        </div>}
       </div>
       <div className='app-footer'>
         <div className="input-group">

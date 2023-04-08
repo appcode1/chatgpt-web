@@ -48,3 +48,11 @@
 .fw-08 {
   font-size:0.8rem;
 }
+ul.no-bullets {
+  list-style-type: none; /* Remove bullets */
+}
+.suggested-box {
+  border:1px solid #75306c;
+  border-radius: 0.25rem;
+  color: #75306c;
+}
