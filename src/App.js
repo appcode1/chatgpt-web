@@ -107,8 +107,14 @@ function App() {
 
     const timeStamp = getTimeStamp();
     conversation.push({ts: timeStamp, q: question, text: 'waiting for reply...'});
-    const requestData = {ts: timeStamp, q: question, lastMsgId: lastReply.id, lastMsgConversationId: lastReply.conversationId};
-    fetch(`${document.location.origin}/chatgpt?id=${userId}`, {
+    const requestData = {ts: timeStamp, q: question,
+          lastMsgId: lastReply.id, //chatgpt
+          lastMsgConversationId: lastReply.conversationId, //chatgpt, bing
+          conversationSignature: lastReply.conversationSignature, //bing
+          clientId: lastReply.clientId, //bing
+          invocationId: lastReply.invocationId, //bing
+        };
+    fetch(`${document.location.origin}/conversation?id=${userId}`, {
       method: 'POST',
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(requestData),
@@ -118,8 +124,14 @@ function App() {
         //OK
         const timeStamp2=getTimeStamp();
         res.json().then(data => {
-          if(data && data.id){
-            setLastReply({ts: data.ts, id: data.id, conversationId: data.conversationId});
+          if(data && data.text){
+            setLastReply({ts: data.ts, 
+              id: data.id, //chatgpt
+              conversationId: data.conversationId, //chatgpt, bing
+              conversationSignature: data.conversationSignature, //bing
+              clientId: data.clientId, //bing
+              invocationId: data.invocationId, //bing
+            });
             data.tt=timeStamp2;
             const theIndex = conversation.findIndex(c => c.ts == data.ts);
             if(theIndex>=0){
@@ -174,8 +186,8 @@ function App() {
     setQuestion('');
     scrollToView();
   };
-  const createMarkup = (text) => {
-    return {__html: '<span class="answer">Bot: </span>' + text.replace(/\n/g,'<br/>')};
+  const createMarkup = (text, bot) => {
+    return {__html: `<span class="answer">${bot ? bot : 'Bot'}: </span>` + text.replace(/\n/g,'<br/>')};
   };
   const QuestionAnaswer = (talk) => 
     <div className='my-2' key={talk.ts}>
@@ -185,7 +197,7 @@ function App() {
         {talk.tt && <span className='me-3'>{talk.tt}</span>}
         {talk.usage && <span>tokens: {talk.usage.prompt_tokens} + {talk.usage.completion_tokens} = {talk.usage.total_tokens}</span>}
       </div>}
-      {talk.text && <div dangerouslySetInnerHTML={createMarkup(talk.text)} />}
+      {talk.text && <div dangerouslySetInnerHTML={createMarkup(talk.text, talk.bot)} />}
     </div>;
   
   const MyChat = () => { 
@@ -203,7 +215,7 @@ function App() {
   if(isBlank(userId) || userId.length < 3 || signInStatus != 'OK') {
     return (
       <div className='signin-box'>
-          <div className='fw-bold fs-4 title px-3'>Play with ChatGPT</div>
+          <div className='fw-bold fs-4 title px-3'>Chat with AI</div>
           <div className="my-2 px-3">Enter the User ID:</div>          
           <div className='my-2 px-3'>
             <input type="text" className="form-control" maxLength={20} value={userId} onChange={handleUserId}/>

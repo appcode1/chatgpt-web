@@ -53,12 +53,14 @@ const start = async () => {
             process.exit(1);
         }
     });
-    console.log(`[myTestWebServer] is running at http://${process.env.API_HOST}:${process.env.API_PORT}`)
+    console.log(`[my nodejs testing web server] is running at http://${process.env.API_HOST}:${process.env.API_PORT}`)
   };
 start();
 
 
-server.get('/ping', () => Date.now().toString());
+//server.get('/ping', () => Date.now().toString());
+server.get('/ping', async () => (new Date()).toString());
+server.get("/ip", async (request) => request.ip);
 
 //------------/test---------------------------
 server.get('/test', async (request, reply) => {
@@ -67,8 +69,10 @@ server.get('/test', async (request, reply) => {
     console.log('test the GET.............');
     console.log('url:', request.url);
     console.log('id & method:', id, request.method);
+    console.log('ip:', request.ip);
+
     if(id=='david'||settings.whiteList.includes(id))
-        reply.code(200).type('application/json').send({message: 'You are okay!', status: 0, code:'SUCCESS'});
+        reply.code(200).type('application/json').send({message: 'You are okay!', status: 0, code:'SUCCESS', ip: request.ip});
     else
         reply.code(401).type('text/plain').send('error: unauthorized');
 });
@@ -81,7 +85,7 @@ server.post('/test', async (request, reply) => {
     console.log('request body object:', request.body);
     console.log('request body string:', JSON.stringify(request.body));
     if(id=='david'||settings.whiteList.includes(id))
-        reply.code(200).type('application/json').send({message: 'You are okay!', status: 0, code:'SUCCESS'});
+        reply.code(200).type('application/json').send({message: 'You are okay!', status: 0, code:'SUCCESS', ip: request.ip});
     else
         reply.code(401).type('text/plain').send('error: unauthorized');
 });

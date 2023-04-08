@@ -7,8 +7,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Back-end: a nodejs web server.
 
-### pnpm
-install pnpm at global: `npm i -g pnpm`
+## pnpm
+
+install pnpm: `npm install -g pnpm`
 
 update to the latest pnpm: `npm i -g pnpm@latest`
 
@@ -68,12 +69,13 @@ create .env from the .env.example
 store the environment variables in .env
 
 ### Run the nodejs web server:
-`npm run chatGPTWebApp` to start the nodejs ChatGPT web app
+`npm run chatgptwebapp` to start the nodejs ChatGPT web app
 
-`npm run myTestWebServer` to start the testing nodejs web server
+`npm run mytestwebserver` to start the testing nodejs web server
 
 
-### test the web app
+### Test the web app
+
 load the web app from http://localhost:5000
 
 ping and test the web app:
