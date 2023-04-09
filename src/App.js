@@ -61,6 +61,7 @@ function App() {
       setUserId(theId);
       setSignInStatus('OK');
       setTotalTokens(0);
+      setSuggestedResponses(null);
     }
     else
       setSignInStatus('Invalid User ID');
@@ -269,7 +270,7 @@ function App() {
       <div className='app-main' id='main'>
         <MyChat />
         {suggestedResponses && <div>
-          <ul className='no-bullets fw-08'>{suggestedResponses.map(a=><li className='my-1'><button className='suggested-box px-2' type='button' onClick={()=>clickSuggestion(a)}>{a}</button></li>)}</ul>
+          {suggestedResponses.map(a=><div className='my-1'><button className='suggested-box px-2' type='button' onClick={()=>clickSuggestion(a)}>{a}</button></div>)}
         </div>}
       </div>
       <div className='app-footer'>
