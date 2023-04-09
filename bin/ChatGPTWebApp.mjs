@@ -58,8 +58,9 @@ server.post('/conversation', async (request, reply) => {
 	const objUrl = url.parse(request.url, true);
     const id = objUrl.query.id;
 
-    id && console.log('From id: ' + id);
+    id && console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
 	if(id==null||id==''||!settings.whiteList.includes(id)){
+		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
     const body = request.body || {};
@@ -137,7 +138,7 @@ server.post('/conversation', async (request, reply) => {
 					clientId: body.clientId,
 					invocationId: body.invocationId,
 					shouldGenerateTitle: false, // only used for ChatGPTClient
-					toneStyle: body.toneStyle,
+					toneStyle: 'creative', //body.toneStyle, //creative, precise, fast
 					clientOptions: null,
 					onProgress: null,
 					abortController,
@@ -198,7 +199,18 @@ server.listen({
 console.log(`[ChatGPT Web App] is running at http://${settings.apiOptions.host}:${settings.apiOptions.port}`)
 
 server.get('/ping', async (request) => `server time: ${(new Date()).toString()}\n\n\nclient ip: ${request.ip}`);
-
+const getTimeStamp = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2,'0');
+    const day = String(date.getDate()).padStart(2,'0');
+    const hour = String(date.getHours()).padStart(2,'0');
+    const minute = String(date.getMinutes()).padStart(2,'0');
+    const seconds = String(date.getSeconds()).padStart(2,'0');
+    const msSeconds = String(date.getMilliseconds()).padStart(3,'0');
+  
+    return `${year}-${month}-${day}T${hour}:${minute}:${seconds}.${msSeconds}`;
+}
 //------------/test---------------------------
 // server.get('/test', async (request, reply) => {
 //     const objUrl = url.parse(request.url, true);
