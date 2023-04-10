@@ -14,8 +14,8 @@ import { pathToFileURL } from 'url';
 import * as url from 'url';
 import fs from 'fs';
 import {appendFile} from 'fs/promises';
-import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt'; //https://github.com/transitive-bullshit/chatgpt-api
-import { /*ChatGPTClient, ChatGPTBrowserClient,*/ BingAIClient } from '@waylaidwanderer/chatgpt-api'; //https://github.com/waylaidwanderer/node-chatgpt-api
+import { ChatGPTAPI /*, ChatGPTUnofficialProxyAPI*/ } from 'chatgpt'; //https://github.com/transitive-bullshit/chatgpt-api
+import { /*ChatGPTClient,*/ ChatGPTBrowserClient, BingAIClient } from '@waylaidwanderer/chatgpt-api'; //https://github.com/waylaidwanderer/node-chatgpt-api
 import dotenv from 'dotenv';
 
 dotenv.config();  //config using .env
@@ -106,10 +106,13 @@ server.post('/conversation', async (request, reply) => {
 				break;
 			case 'chatgpt-browser':
 				if(!chatGPTProxyApiClient){
-					chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
-						accessToken: settings.chatGptBrowserClient.accessToken,
-						apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
-					  });
+					// chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
+					// 	accessToken: settings.chatGptBrowserClient.accessToken,
+					// 	apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
+					//   });
+					//ChatGPTUnofficialProxyAPI has some bug, so change to use ChatGPTBrowserClient
+					//
+					chatGPTProxyApiClient = new ChatGPTBrowserClient(settings.chatGptBrowserClient);
 				}
 				apiResponse = await chatGPTProxyApiClient.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
@@ -117,11 +120,10 @@ server.post('/conversation', async (request, reply) => {
 					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
 				  });
 
-				  result = {ts: body.ts, q: body.q, bot: 'ChatGPT',
-					id: apiResponse.id, //chatgpt, chatgpt-browser
+				result = {ts: body.ts, q: body.q, bot: 'ChatGPT',
+					id: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
-					text: apiResponse.text, 
-					usage: apiResponse.detail && apiResponse.detail.usage ? apiResponse.detail.usage : undefined, //chatgpt
+					text: apiResponse.response ?? apiResponse.text, 
 				};
 	
 				break;
