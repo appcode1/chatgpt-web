@@ -11,7 +11,6 @@ import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import cors from '@fastify/cors';
 import { pathToFileURL } from 'url';
-import * as url from 'url';
 import fs from 'fs';
 import {appendFile} from 'fs/promises';
 import { ChatGPTAPI /*, ChatGPTUnofficialProxyAPI*/ } from 'chatgpt'; //https://github.com/transitive-bullshit/chatgpt-api
@@ -55,11 +54,17 @@ await server.register(fastifyStatic, {
 console.log('serve the static web resources from the folder:', fs.realpathSync('./build'));
 
 server.post('/conversation', async (request, reply) => {
-	const objUrl = url.parse(request.url, true);
-    const id = objUrl.query.id;
-
-    id && console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
-	if(id==null||id==''||!settings.whiteList.includes(id)){
+	const acceptcode = request.headers['accept-code'];
+	if(!acceptcode){
+		console.log('Unauthorized');
+		return reply.code(401).type('text/plain').send('Unauthorized');
+	}
+	let id;
+	try{
+		id=Buffer.from(acceptcode,'base64').toString('utf-8');
+	}catch(err){console.error(err)}
+    console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
+	if(!id||!settings.whiteList.includes(id)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}

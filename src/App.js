@@ -123,9 +123,9 @@ function App() {
           clientId: lastReply.clientId, //bing
           invocationId: lastReply.invocationId, //bing
         };
-    fetch(`${document.location.origin}/conversation?id=${userId}`, {
+    fetch(`${document.location.origin}/conversation`, {
       method: 'POST',
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json", "Accept-Code": window.btoa(userId)},
       body: JSON.stringify(requestData),
     })
     .then((res) => {
