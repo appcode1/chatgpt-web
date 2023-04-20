@@ -69,7 +69,9 @@ server.get('/test', async (request, reply) => {
     console.log('url:', request.url);
     console.log('id & method:', id, request.method);
     console.log('ip:', request.ip);
-
+    console.log('headers:', request.headers);
+    console.log(request.headers['content-type']);
+    console.log(request.headers.code, request.headers['code']);
     if(id=='david'||settings.whiteList.includes(id))
         reply.code(200).type('application/json').send({message: 'You are okay!', status: 0, code:'SUCCESS', ip: request.ip});
     else
@@ -81,6 +83,9 @@ server.post('/test', async (request, reply) => {
     console.log('test the POST.............');
     console.log('url:', request.url);
     console.log('id & method:', id, request.method);
+    console.log('headers:', request.headers);
+    console.log(request.headers['content-type']);
+    console.log(request.headers.code, request.headers['code']);
     console.log('request body object:', request.body);
     console.log('request body string:', JSON.stringify(request.body));
     if(id=='david'||settings.whiteList.includes(id))
@@ -93,7 +98,7 @@ server.post('/test', async (request, reply) => {
 var requestData={name:'david', sex:'M', age:22, prop: {h:179, w:65}};
 fetch('http://localhost:5000/test?id=david', {
       method: 'POST',
-      headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json", "code":"somethingencryptedstringhere!" },
       body: JSON.stringify(requestData),
     }).then(res=>res.json()).then(data=>console.log(data));
 */

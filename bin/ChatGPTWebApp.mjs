@@ -11,11 +11,10 @@ import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import cors from '@fastify/cors';
 import { pathToFileURL } from 'url';
-import * as url from 'url';
 import fs from 'fs';
 import {appendFile} from 'fs/promises';
-import { ChatGPTAPI, ChatGPTUnofficialProxyAPI } from 'chatgpt'; //https://github.com/transitive-bullshit/chatgpt-api
-import { /*ChatGPTClient, ChatGPTBrowserClient,*/ BingAIClient } from '@waylaidwanderer/chatgpt-api'; //https://github.com/waylaidwanderer/node-chatgpt-api
+import { ChatGPTAPI /*, ChatGPTUnofficialProxyAPI*/ } from 'chatgpt'; //https://github.com/transitive-bullshit/chatgpt-api
+import { /*ChatGPTClient,*/ ChatGPTBrowserClient, BingAIClient } from '@waylaidwanderer/chatgpt-api'; //https://github.com/waylaidwanderer/node-chatgpt-api
 import dotenv from 'dotenv';
 
 dotenv.config();  //config using .env
@@ -55,11 +54,17 @@ await server.register(fastifyStatic, {
 console.log('serve the static web resources from the folder:', fs.realpathSync('./build'));
 
 server.post('/conversation', async (request, reply) => {
-	const objUrl = url.parse(request.url, true);
-    const id = objUrl.query.id;
-
-    id && console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
-	if(id==null||id==''||!settings.whiteList.includes(id)){
+	const acceptcode = request.headers['accept-code'];
+	if(!acceptcode){
+		console.log('Unauthorized');
+		return reply.code(401).type('text/plain').send('Unauthorized');
+	}
+	let id;
+	try{
+		id=Buffer.from(acceptcode,'base64').toString('utf-8');
+	}catch(err){console.error(err)}
+    console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
+	if(!id||!settings.whiteList.includes(id)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
@@ -106,10 +111,13 @@ server.post('/conversation', async (request, reply) => {
 				break;
 			case 'chatgpt-browser':
 				if(!chatGPTProxyApiClient){
-					chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
-						accessToken: settings.chatGptBrowserClient.accessToken,
-						apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
-					  });
+					// chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
+					// 	accessToken: settings.chatGptBrowserClient.accessToken,
+					// 	apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
+					//   });
+					//ChatGPTUnofficialProxyAPI has some bug, so change to use ChatGPTBrowserClient
+					//
+					chatGPTProxyApiClient = new ChatGPTBrowserClient(settings.chatGptBrowserClient);
 				}
 				apiResponse = await chatGPTProxyApiClient.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
@@ -117,11 +125,10 @@ server.post('/conversation', async (request, reply) => {
 					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
 				  });
 
-				  result = {ts: body.ts, q: body.q, bot: 'ChatGPT',
-					id: apiResponse.id, //chatgpt, chatgpt-browser
+				result = {ts: body.ts, q: body.q, bot: 'ChatGPT',
+					id: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
-					text: apiResponse.text, 
-					usage: apiResponse.detail && apiResponse.detail.usage ? apiResponse.detail.usage : undefined, //chatgpt
+					text: apiResponse.response ?? apiResponse.text, 
 				};
 	
 				break;
