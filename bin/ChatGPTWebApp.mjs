@@ -38,7 +38,8 @@ if (fs.existsSync(settingsFile)) {
 
 
 let chatGPTApiClient;
-let chatGPTProxyApiClient;
+let chatGPTProxyApiClientGpt4;
+let chatGPTProxyApiClientGpt3;
 let bingAIApiClient;
 
 const server = fastify();
@@ -81,13 +82,14 @@ server.post('/conversation', async (request, reply) => {
 	let apiResponse;
 	let result;
 	try{
-		switch(settings.apiOptions.clientToUse){
+		//switch(settings.apiOptions.clientToUse){
+		switch(body.model){
 			case 'chatgpt':
 				if(!chatGPTApiClient){
 					chatGPTApiClient = new ChatGPTAPI({
 						apiKey: settings.chatGptClient.openaiApiKey,
 						completionParams: {
-							model: 'gpt-3.5-turbo', //settings.chatGptClient.modelOptions.model,
+							model: settings.chatGptClient.modelOptions.model,
 							temperature: 1, //default to 0.8 in ChatGPTAPI.  What sampling temperature to use, between 0 and 2
 							top_p: 1,
 							presence_penalty: 1, //Number between -2.0 and 2.0
@@ -101,7 +103,8 @@ server.post('/conversation', async (request, reply) => {
 					parentMessageId: body.lastMsgId,
 				  });
 
-				  result = {ts: body.ts, q: body.q, bot: 'GPT3.5',
+				  result = {ts: body.ts, q: body.q, 
+					bot: 'GPT3.5',
 					id: apiResponse.id, //chatgpt, chatgpt-browser
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.text, 
@@ -109,23 +112,44 @@ server.post('/conversation', async (request, reply) => {
 				};
 	
 				break;
-			case 'chatgpt-browser':
-				if(!chatGPTProxyApiClient){
+			case 'chatgpt-browser;3.5':
+				if(!chatGPTProxyApiClientGpt3){
+					const gpt35Setting = {...settings.chatGptBrowserClient, model: 'text-davinci-002-render-sha'};
+					chatGPTProxyApiClientGpt3 = new ChatGPTBrowserClient(gpt35Setting);
+				}
+				apiResponse = await chatGPTProxyApiClientGpt3.sendMessage(body.q, {
+					timeoutMs: 5 * 60 * 1000,
+					conversationId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgConversationId : undefined,
+					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
+				  });
+
+				result = {ts: body.ts, q: body.q,
+					bot: 'ChatGPT3.5',
+					id: apiResponse.messageId ?? apiResponse.id, 
+					conversationId: apiResponse.conversationId, //chatgpt-browser
+					text: apiResponse.response ?? apiResponse.text, 
+				};
+	
+				break;
+			case 'chatgpt-browser;4':
+				if(!chatGPTProxyApiClientGpt4){
 					// chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
 					// 	accessToken: settings.chatGptBrowserClient.accessToken,
 					// 	apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
 					//   });
 					//ChatGPTUnofficialProxyAPI has some bug, so change to use ChatGPTBrowserClient
 					//
-					chatGPTProxyApiClient = new ChatGPTBrowserClient(settings.chatGptBrowserClient);
+					const gpt40Setting = {...settings.chatGptBrowserClient, model: 'gpt-4'};
+					chatGPTProxyApiClientGpt4 = new ChatGPTBrowserClient(gpt40Setting);
 				}
-				apiResponse = await chatGPTProxyApiClient.sendMessage(body.q, {
+				apiResponse = await chatGPTProxyApiClientGpt4.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
 					conversationId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgConversationId : undefined,
 					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
 				  });
 
-				result = {ts: body.ts, q: body.q, bot: 'ChatGPT',
+				result = {ts: body.ts, q: body.q,
+					bot: 'ChatGPT4',
 					id: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.response ?? apiResponse.text, 
