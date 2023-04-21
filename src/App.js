@@ -230,10 +230,10 @@ function App() {
   };
   const modelSelection = [
     {id:0, value: '', label: '请选择'},
-    {id:1, value: 'bing', label: 'Bing', desc:'通过Bing使用GPT，速度有点慢'},
-    {id:2, value: 'chatgpt-browser;4', label:'通过反向代理使用ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，也可能会经常出错。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
-    {id:3, value: 'chatgpt-browser;3.5', label:'通过反向代理使用ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，也可能会经常出错。当前的GPT3.5使用限制取决于上一级反向代理。'},
-    {id:4, value: 'chatgpt', label:'通过官方API调用GPT3.5', desc:'通过官方的API调用GPT3.5，速度稳定，但是不免费。可以自定义参数调整输出结果，当前temperature=1, model=gpt-3.5-turbo'}
+    {id:1, value: 'bing', label: 'Microsoft Bing', desc:'Bing新版本使用智能搜索并以聊天的形式输出结果。Bing并没有官方的API可以调用，这里使用非官方的API调用之。\n虽然速度有点慢，但输出稳定。'},
+    {id:2, value: 'chatgpt', label:'OpenAI ChatGPT', desc:'通过OpenAI的API调用GPT3.5。速度稳定，根据token个数计费(GPT3.5: USD$0.002/1K tokens)。可以自定义参数调整输出结果，当前参数：\ntemperature=1, \ntop_p=1, \npresence_penalty=1'},
+    // {id:3, value: 'chatgpt-browser;4', label:'通过反向代理使用ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI block。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
+    // {id:4, value: 'chatgpt-browser;3.5', label:'通过反向代理使用ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI block。当前的GPT3.5使用限制取决于上一级反向代理。'},
   ];
   if(isBlank(userId) || userId.length < 3 || signInStatus !== 'OK') {
     return (
@@ -246,7 +246,7 @@ function App() {
             </select>            
           </div>
           <div className="my-2 px-3 fw-08">
-            {modelSelection.find(a=>a.value === AIModel).desc && <div className='text-primary'>{modelSelection.find(a=>a.value === AIModel).desc}</div>}
+            {modelSelection.find(a=>a.value === AIModel).desc && <div className='text-primary' dangerouslySetInnerHTML={{__html: modelSelection.find(a=>a.value === AIModel).desc.replace(/\n/g,'<br/>')}}></div>}
           </div>
           <div className="mt-3 px-3">用户ID:</div>          
           <div className='my-2 px-3'>
