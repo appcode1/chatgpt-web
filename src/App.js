@@ -231,9 +231,9 @@ function App() {
   const modelSelection = [
     {id:0, value: '', label: '请选择'},
     {id:1, value: 'bing', label: 'Microsoft Bing', desc:'Bing新版本使用智能搜索并以聊天的形式输出结果。Bing并没有官方的API可以调用，这里使用非官方的API调用之。\n虽然速度有点慢，但输出稳定。'},
-    {id:2, value: 'chatgpt', label:'OpenAI ChatGPT', desc:'通过OpenAI的API调用GPT3.5。速度稳定，根据token个数计费(GPT3.5: USD$0.002/1K tokens)。可以自定义参数调整输出结果，当前参数：\ntemperature=1, \ntop_p=1, \npresence_penalty=1'},
-    // {id:3, value: 'chatgpt-browser;4', label:'通过反向代理使用ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI block。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
-    // {id:4, value: 'chatgpt-browser;3.5', label:'通过反向代理使用ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI block。当前的GPT3.5使用限制取决于上一级反向代理。'},
+    {id:2, value: 'chatgpt', label:'OpenAI ChatGPT', desc:'通过OpenAI的API调用GPT3.5。速度稳定，根据token个数计费，GPT3.5的费用：人民币1分钱可以使用600个token。'},
+    // {id:3, value: 'chatgpt-browser;4', label:'Unofficial ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT(GPT4)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
+    // {id:4, value: 'chatgpt-browser;3.5', label:'Unofficial ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT(GPT3.5)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT3.5使用限制取决于上一级反向代理。'},
   ];
   if(isBlank(userId) || userId.length < 3 || signInStatus !== 'OK') {
     return (
