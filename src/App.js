@@ -116,11 +116,14 @@ function App() {
     let updatedConversation = [...conversation, {ts: timeStamp, q: ask, text: 'waiting for reply...'}];
     setConversation(updatedConversation);
     const requestData = {ts: timeStamp, q: ask,
-          lastMsgId: lastReply.id, //chatgpt
+          lastMsgId: lastReply.msgId, //chatgpt, bing(jailBreak mode)
           lastMsgConversationId: lastReply.conversationId, //chatgpt, bing
           conversationSignature: lastReply.conversationSignature, //bing
           clientId: lastReply.clientId, //bing
           invocationId: lastReply.invocationId, //bing
+          systemMessage: lastReply.systemMessage,
+          context: lastReply.context,
+          jailbreakConversationId: lastReply.jailbreakConversationId, //bing(jailBreak)
           model: AIModel,
         };
     fetch(`${document.location.origin}/conversation`, {
@@ -135,11 +138,14 @@ function App() {
         res.json().then(data => {
           if(data && data.text){
             setLastReply({ts: data.ts, 
-              id: data.id, //chatgpt
+              msgId: data.msgId, //chatgpt, bing(jailBreak)
               conversationId: data.conversationId, //chatgpt, bing
               conversationSignature: data.conversationSignature, //bing
               clientId: data.clientId, //bing
               invocationId: data.invocationId, //bing
+              systemMessage: data.systemMessage,
+              context: data.context,
+              jailbreakConversationId: data.jailbreakConversationId, //bing(jailBreak)
             });
             data.tt=timeStamp2;
             if(data.suggestedResponses){
@@ -230,8 +236,8 @@ function App() {
   };
   const modelSelection = [
     {id:0, value: '', label: '请选择'},
-    {id:1, value: 'bing', label: 'Microsoft Bing', desc:'Bing新版本使用智能搜索并以聊天的形式输出结果。Bing并没有官方的API可以调用，这里使用非官方的API调用之。\n虽然速度有点慢，但输出稳定。'},
-    {id:2, value: 'chatgpt', label:'OpenAI ChatGPT', desc:'通过OpenAI的API调用GPT3.5。速度稳定，API调用不免费。GPT3.5的费用：人民币1分钱可以使用600个token。'},
+    {id:1, value: 'bing', label: 'Bing Chat', desc:'The AI-powered copilot for the web:\n 1. Ask complex questions\n 2. Get better answers\n 3. Get creative inspiration\nStart an original and imaginative chat.'},
+    {id:2, value: 'chatgpt', label:'ChatGPT', desc:'通过OpenAI的API调用GPT3.5。\n速度稳定，API调用不免费。\nGPT3.5的费用：\n人民币1分钱可以使用600个token。'},
     // {id:3, value: 'chatgpt-browser;4', label:'Unofficial ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT(GPT4)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
     // {id:4, value: 'chatgpt-browser;3.5', label:'Unofficial ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT(GPT3.5)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT3.5使用限制取决于上一级反向代理。'},
   ];

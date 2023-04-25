@@ -83,3 +83,16 @@ ping and test the web app:
 http://localhost:5000/ping
 
 http://locahost:5000/test
+
+### run it as background service
+
+Firstly, install pm2 `pnpm install -g pm2`
+
+Then use pm2 to manage the service:
+
+start it: `pm2 start bin/ChatGPTWebApp.mjs`
+
+check the list: `pm2 list`
+
+stop it: `pm2 stop ChatGPTWebApp`
+

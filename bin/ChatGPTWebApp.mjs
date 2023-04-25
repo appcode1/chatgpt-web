@@ -105,7 +105,7 @@ server.post('/conversation', async (request, reply) => {
 
 				  result = {ts: body.ts, q: body.q, 
 					bot: 'GPT3.5',
-					id: apiResponse.id, //chatgpt, chatgpt-browser
+					msgId: apiResponse.id, //chatgpt, chatgpt-browser
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.text, 
 					usage: apiResponse.detail && apiResponse.detail.usage ? apiResponse.detail.usage : undefined, //chatgpt
@@ -125,7 +125,7 @@ server.post('/conversation', async (request, reply) => {
 
 				result = {ts: body.ts, q: body.q,
 					bot: 'ChatGPT3.5',
-					id: apiResponse.messageId ?? apiResponse.id, 
+					msgId: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.response ?? apiResponse.text, 
 				};
@@ -150,7 +150,7 @@ server.post('/conversation', async (request, reply) => {
 
 				result = {ts: body.ts, q: body.q,
 					bot: 'ChatGPT4',
-					id: apiResponse.messageId ?? apiResponse.id, 
+					msgId: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.response ?? apiResponse.text, 
 				};
@@ -161,28 +161,41 @@ server.post('/conversation', async (request, reply) => {
 				if(!bingAIApiClient){
 					bingAIApiClient = new BingAIClient({ ...settings.bingAiClient, cache: settings.cacheOptions });
 				}
+
 				apiResponse = await bingAIApiClient.sendMessage(body.q, {
-					jailbreakConversationId: body.jailbreakConversationId,
+					jailbreakConversationId: !body.jailbreakConversationId ? true : body.jailbreakConversationId, // activate jailbreak mode for Bing
 					conversationId: body.lastMsgConversationId ? body.lastMsgConversationId.toString() : undefined,
 					parentMessageId: body.lastMsgId ? body.lastMsgId.toString() : undefined,
+					systemMessage: body.systemMessage,
+					context: body.context,
 					conversationSignature: body.conversationSignature,
 					clientId: body.clientId,
 					invocationId: body.invocationId,
 					shouldGenerateTitle: false, // only used for ChatGPTClient
-					toneStyle: 'creative', //body.toneStyle, //creative, precise, fast
+					toneStyle: 'creative', //body.toneStyle, //balanced, creative, precise, fast
 					clientOptions: null,
 					onProgress: null,
 					abortController,
 				});
-
-				result = {ts: body.ts, q: body.q, bot: 'Bing',
-					conversationId: apiResponse.conversationId,
-					conversationSignature: apiResponse.conversationSignature,
-					clientId: apiResponse.clientId,
-					invocationId: apiResponse.invocationId,
-					text: apiResponse.response,
-					suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
-				};
+				//console.log('bing response:', apiResponse);
+				if(apiResponse.jailbreakConversationId){
+					//jailbreak mode
+					result = {ts: body.ts, q: body.q, bot: 'Bing',
+						jailbreakConversationId: apiResponse.jailbreakConversationId,
+						msgId: apiResponse.messageId,
+						text: apiResponse.response,
+						suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
+					};
+				}else {
+					result = {ts: body.ts, q: body.q, bot: 'Bing',
+						conversationId: apiResponse.conversationId,
+						conversationSignature: apiResponse.conversationSignature,
+						clientId: apiResponse.clientId,
+						invocationId: apiResponse.invocationId,
+						text: apiResponse.response,
+						suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
+					};
+				}
 				break;
 			default:
 				console.error('settings.apiOptions.clientToUse is not defined in settings file!');
