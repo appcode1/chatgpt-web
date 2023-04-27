@@ -112,6 +112,9 @@ export default {
     },
 
     //add more users to the whiteList:
-    whiteList: ['public', 'user01', 'user02', 'xbq',],
+    whiteList: {
+        'chatgpt': ['public', 'user01', 'user02', 'xbq'],
+        'bing': ['public', 'user01', 'user02', 'xbq'],
+    },
 
 };

@@ -61,6 +61,7 @@ function App() {
       setSignInStatus('OK');
       setTotalTokens(0);
       setSuggestedResponses(null);
+      setLastReply({});
     }
     else
       setSignInStatus('Invalid User ID');
@@ -116,8 +117,8 @@ function App() {
     let updatedConversation = [...conversation, {ts: timeStamp, q: ask, text: 'waiting for reply...'}];
     setConversation(updatedConversation);
     const requestData = {ts: timeStamp, q: ask,
-          lastMsgId: lastReply.msgId, //chatgpt, bing(jailBreak mode)
-          lastMsgConversationId: lastReply.conversationId, //chatgpt, bing
+          msgId: lastReply.msgId, //chatgpt, bing(jailBreak mode)
+          conversationId: lastReply.conversationId, //chatgpt, bing
           conversationSignature: lastReply.conversationSignature, //bing
           clientId: lastReply.clientId, //bing
           invocationId: lastReply.invocationId, //bing
@@ -128,7 +129,7 @@ function App() {
         };
     fetch(`${document.location.origin}/conversation`, {
       method: 'POST',
-      headers: {"Content-Type": "application/json", "Accept-Code": window.btoa(userId)},
+      headers: {"Content-Type": "application/json", "Accept-Code": window.btoa(userId), "model": AIModel},
       body: JSON.stringify(requestData),
     })
     .then((res) => {
@@ -236,10 +237,11 @@ function App() {
   };
   const modelSelection = [
     {id:0, value: '', label: '请选择'},
-    {id:1, value: 'bing', label: 'Bing Chat', desc:'The AI-powered copilot for the web:\n 1. Ask complex questions\n 2. Get better answers\n 3. Get creative inspiration\nStart an original and imaginative chat.'},
-    {id:2, value: 'chatgpt', label:'ChatGPT', desc:'通过OpenAI的API调用GPT3.5。\n速度稳定，API调用不免费。\nGPT3.5的费用：\n人民币1分钱可以使用600个token。'},
-    // {id:3, value: 'chatgpt-browser;4', label:'Unofficial ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT(GPT4)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
-    // {id:4, value: 'chatgpt-browser;3.5', label:'Unofficial ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT(GPT3.5)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT3.5使用限制取决于上一级反向代理。'},
+    {id:1, value: 'bing-chat', label: 'Bing Chat (Bing)', desc:'微软Bing(必应)的聊天模式。\n使用身份名称Bing(必应)，背后有GPT-4支持，遵从很多规则和限制，可从网上搜索内容并以聊天的形式回答问题。'},
+    {id:2, value: 'bing-sydney', label: 'Bing Chat Jailbreak (Sydney)', desc:'微软Bing(必应)聊天模式的特别版本。\n使用身份名称Sydney，是一个AI助理。没有普通Bing聊天模式的诸多规则限制，更具有创造性和个性，也更加有趣。'},
+    {id:3, value: 'chatgpt', label:'ChatGPT', desc:'通过OpenAI的API调用GPT3.5。\n速度稳定，API调用不免费。\nGPT3.5的费用：\n人民币1分钱可以使用600个token。'},
+    // {id:4, value: 'chatgpt-browser;4', label:'Unofficial ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT(GPT4)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
+    // {id:5, value: 'chatgpt-browser;3.5', label:'Unofficial ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT(GPT3.5)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT3.5使用限制取决于上一级反向代理。'},
   ];
   if(isBlank(userId) || userId.length < 3 || signInStatus !== 'OK') {
     return (

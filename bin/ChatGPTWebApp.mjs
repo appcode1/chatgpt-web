@@ -56,7 +56,15 @@ console.log('serve the static web resources from the folder:', fs.realpathSync('
 
 server.post('/conversation', async (request, reply) => {
 	const acceptcode = request.headers['accept-code'];
-	if(!acceptcode){
+	let model = request.headers['model'];
+	if(!acceptcode || !model){
+		console.log('Unauthorized');
+		return reply.code(401).type('text/plain').send('Unauthorized');
+	}
+	if(model=='bing-chat'||model=='bing-sydney'){
+		model = 'bing';
+	}
+	if(!settings.apiOptions.perMessageClientOptionsWhitelist.validClientsToUse.includes(model)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
@@ -65,7 +73,8 @@ server.post('/conversation', async (request, reply) => {
 		id=Buffer.from(acceptcode,'base64').toString('utf-8');
 	}catch(err){console.error(err)}
     console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
-	if(!id||!settings.whiteList.includes(id)){
+	
+	if(!id||!settings.whiteList[model].includes(id)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
@@ -100,7 +109,7 @@ server.post('/conversation', async (request, reply) => {
 				}
 				apiResponse = await chatGPTApiClient.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
-					parentMessageId: body.lastMsgId,
+					parentMessageId: body.msgId,
 				  });
 
 				  result = {ts: body.ts, q: body.q, 
@@ -119,8 +128,8 @@ server.post('/conversation', async (request, reply) => {
 				}
 				apiResponse = await chatGPTProxyApiClientGpt3.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
-					conversationId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgConversationId : undefined,
-					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
+					conversationId: body.msgId && body.conversationId ? body.conversationId : undefined,
+					parentMessageId: body.msgId && body.conversationId ? body.msgId : undefined,
 				  });
 
 				result = {ts: body.ts, q: body.q,
@@ -144,8 +153,8 @@ server.post('/conversation', async (request, reply) => {
 				}
 				apiResponse = await chatGPTProxyApiClientGpt4.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
-					conversationId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgConversationId : undefined,
-					parentMessageId: body.lastMsgId && body.lastMsgConversationId ? body.lastMsgId : undefined,
+					conversationId: body.msgId && body.conversationId ? body.conversationId : undefined,
+					parentMessageId: body.msgId && body.conversationId ? body.msgId : undefined,
 				  });
 
 				result = {ts: body.ts, q: body.q,
@@ -156,55 +165,60 @@ server.post('/conversation', async (request, reply) => {
 				};
 	
 				break;
-			case 'bing':
+			case 'bing-chat':
+			case 'bing-sydney':
 				//https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/bin/server.js
 				if(!bingAIApiClient){
 					bingAIApiClient = new BingAIClient({ ...settings.bingAiClient, cache: settings.cacheOptions });
 				}
 
-				apiResponse = await bingAIApiClient.sendMessage(body.q, {
-					jailbreakConversationId: !body.jailbreakConversationId ? true : body.jailbreakConversationId, // activate jailbreak mode for Bing
-					conversationId: body.lastMsgConversationId ? body.lastMsgConversationId.toString() : undefined,
-					parentMessageId: body.lastMsgId ? body.lastMsgId.toString() : undefined,
-					systemMessage: body.systemMessage,
-					context: body.context,
-					conversationSignature: body.conversationSignature,
-					clientId: body.clientId,
-					invocationId: body.invocationId,
-					shouldGenerateTitle: false, // only used for ChatGPTClient
-					toneStyle: 'creative', //body.toneStyle, //balanced, creative, precise, fast
-					clientOptions: null,
-					onProgress: null,
-					abortController,
-				});
-				//console.log('bing response:', apiResponse);
-				if(apiResponse.jailbreakConversationId){
-					//jailbreak mode
-					result = {ts: body.ts, q: body.q, bot: 'Bing',
-						jailbreakConversationId: apiResponse.jailbreakConversationId,
-						msgId: apiResponse.messageId,
-						text: apiResponse.response,
-						suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
+				let opts;
+				if(body.model === 'bing-sydney'){
+					 //activate jailbreak mode for Bing
+					opts = {
+						jailbreakConversationId: !body.jailbreakConversationId ? true : body.jailbreakConversationId,
+						parentMessageId: body.msgId ? body.msgId.toString() : undefined,
+						toneStyle: 'creative', //body.toneStyle, //balanced, creative, precise, fast
+						clientOptions: null,
+						onProgress: null,
+						abortController,
 					};
 				}else {
-					result = {ts: body.ts, q: body.q, bot: 'Bing',
-						conversationId: apiResponse.conversationId,
-						conversationSignature: apiResponse.conversationSignature,
-						clientId: apiResponse.clientId,
-						invocationId: apiResponse.invocationId,
-						text: apiResponse.response,
-						suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
+					//bing-chat
+					opts = {
+						conversationId: body.conversationId ? body.conversationId.toString() : undefined,
+						conversationSignature: body.conversationSignature,
+						clientId: body.clientId,
+						invocationId: body.invocationId,
+						toneStyle: 'creative', //body.toneStyle, //balanced, creative, precise, fast
+						clientOptions: null,
+						onProgress: null,
+						abortController,
 					};
 				}
+
+				apiResponse = await bingAIApiClient.sendMessage(body.q, opts);
+				//console.log('bing response:', apiResponse);
+
+				//jailbreak mode --- jailbreakConversationId has value
+				result = {ts: body.ts, q: body.q, 
+					bot: apiResponse.jailbreakConversationId ? 'Sydney' : 'Bing',
+					jailbreakConversationId: apiResponse.jailbreakConversationId, //jailbreak
+					msgId: apiResponse.messageId, //jailbreak
+					conversationId: apiResponse.conversationId,
+					conversationSignature: apiResponse.conversationSignature,
+					clientId: apiResponse.clientId,
+					invocationId: apiResponse.invocationId,
+					text: apiResponse.response,
+					suggestedResponses: apiResponse.details?.suggestedResponses?.map(a=>a.text),
+				};
+				
 				break;
 			default:
 				console.error('settings.apiOptions.clientToUse is not defined in settings file!');
 				process.exit(1);
 		}
 				  
-		//console.log(`${settings.apiOptions.clientToUse} API response object:`, apiResponse);
-		//console.log('result object:', result);
-
 		//log the usage for this id
 		var filename=`${id}.log`;
 		var line = `{"ts":"${result.ts}", "ip":"${request.ip}", "bot":"${result.bot}"`;
