@@ -32,7 +32,14 @@
   padding: 0.25rem;
   background-color: #f5f0f0;
 }
-
+#btn1 {
+  height: 3rem;
+}
+#txt1 {
+  resize: horizontal;
+  overflow: hidden;
+  height: 3rem;
+}
 .question, .answer {
   font-weight: 400;
   color: #0d6efd;
