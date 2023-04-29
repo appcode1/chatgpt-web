@@ -140,7 +140,7 @@ function App() {
         };
     fetch(`${document.location.origin}/conversation`, {
       method: 'POST',
-      headers: {"Content-Type": "application/json", "Accept-Code": window.btoa(userId), "model": AIModel},
+      headers: {"Content-Type": "application/json", "Accept-Code": window.btoa(userId), "model": AIModel, "user": userId},
       body: JSON.stringify(requestData),
     })
     .then((res) => {
@@ -250,9 +250,10 @@ function App() {
     {id:0, value: '', label: '请选择'},
     {id:1, value: 'bing-chat', label: 'Bing (Bing)', desc:'微软Bing(必应)的聊天模式。\n使用身份名称Bing(必应)，背后有GPT-4支持，遵从很多规则和限制，可从网上搜索内容并以聊天的形式回答问题。'},
     {id:2, value: 'bing-sydney', label: 'Bing Jailbreak (Sydney)', desc:'微软Bing(必应)聊天模式的特别版本。\n使用身份名称Sydney，是一个AI助理。没有普通Bing聊天模式的诸多规则限制，更具有创造性和个性，也更加有趣。'},
-    {id:3, value: 'chatgpt', label:'ChatGPT (GPT3.5)', desc:'通过OpenAI的API调用GPT3.5。\n速度稳定，API调用不免费。\nGPT3.5的费用：\n人民币1分钱可以使用600个token。'},
-    // {id:4, value: 'chatgpt-browser;4', label:'Unofficial ChatGPT(GPT4)', desc:'通过非官方的反向代理使用ChatGPT(GPT4)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT4的使用取决于上一级反向代理，而且GPT4也有使用限制：每3个小时只能有25个问题。'},
-    // {id:5, value: 'chatgpt-browser;3.5', label:'Unofficial ChatGPT(GPT3.5)', desc:'通过非官方的反向代理使用ChatGPT(GPT3.5)，与官方的浏览器客户端的输出完全一样，但是速度不稳定，其调用可能被OpenAI封杀。当前的GPT3.5使用限制取决于上一级反向代理。'},
+    {id:3, value: 'chatgpt-browser-3.5-1', label:'ChatGPT Web (GPT3.5) - 1', desc:'反向代理1：\n连接至ChatGPT web app (GPT3.5)。\n速度和稳定性没有保障，如果出错，就切换至反向代理2。'},
+    {id:4, value: 'chatgpt-browser-3.5-2', label:'ChatGPT Web (GPT3.5) - 2', desc:'反向代理2：\n连接至ChatGPT web app (GPT3.5)。\n速度和稳定性没有保障，如果出错，就切换至反向代理1。'},
+    {id:5, value: 'chatgpt-3.5', label:'ChatGPT Model (GPT3.5)', desc:'通过OpenAI的API调用GPT3.5。\n速度和稳定性好，API调用不免费。\nGPT3.5的费用：\n人民币1分钱可以使用600个token。'},
+    {id:6, value: 'chatgpt-4', label:'ChatGPT Model (GPT4)', desc:'通过OpenAI的API调用GPT4。\n速度和稳定性好，API调用不免费。\nGPT4 (8K content)的费用，prompt token与completion token价格分开计算：\nprompt(提问)-人民币1分钱可以使用41个token；completion(回答)-人民币1分钱可以使用20个token.'},
   ];
   if(isBlank(userId) || userId.length < 3 || signInStatus !== 'OK') {
     return (

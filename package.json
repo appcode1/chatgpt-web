@@ -23,7 +23,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "chatgptwebapp": "node bin/ChatGPTWebApp.mjs",
+    "chatwebapp": "node bin/chatwebapp.mjs",
     "mytestwebserver": "node bin/MyTestWebServer.js"
   },
   "eslintConfig": {

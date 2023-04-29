@@ -51,19 +51,22 @@ export default {
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
+
+    reverseProxyUrlsWorking: ['https://ai.fakeopen.com/api/conversation','https://api.pawan.krd/backend-api/conversation'],
     chatGptBrowserClient: {
         // (Optional) Support for a reverse proxy for the conversation endpoint (private API server).
         // Warning: This will expose your access token to a third party. Consider the risks before using this.
         // https://bypass.duti.tech/api/conversation    not working now
-        // https://bypass.churchless.tech/api/conversation   working but not robust, //5 req / 10 seconds by IP
+        // https://bypass.churchless.tech/api/conversation   not working now, //5 req / 10 seconds by IP
         // https://api.pawan.krd/backend-api/conversation    working but not robust, //50 req / 15 seconds (~3 r/s)
-        reverseProxyUrl: 'https://api.pawan.krd/backend-api/conversation',
+        // https://ai.fakeopen.com/api/conversation    working //5 req / 10 seconds by IP
+        reverseProxyUrl: 'https://ai.fakeopen.com/api/conversation',
         // Access token from https://chat.openai.com/api/auth/session
         accessToken: process.env.OPENAI_ACCESS_TOKEN || '',
  
         // GPT3.5: text-davinci-002-render-sha
         // GPT4: gpt-4
-        model: 'gpt-4',
+        model: 'text-davinci-002-render-sha',
 
         // Cookies from chat.openai.com (likely not required if using reverse proxy server).
         cookies: '',
@@ -113,8 +116,9 @@ export default {
 
     //add more users to the whiteList:
     whiteList: {
-        'chatgpt': ['public', 'user01', 'user02', 'xbq'],
-        'bing': ['public', 'user01', 'user02', 'xbq'],
+        'bing_chatgpt-browser': ['public', 'user01', 'user02', 'xbq'],
+        'chatgpt-3.5': ['public', 'user01', 'user02', 'xbq'],
+        'chatgpt-4': ['public', 'user01', 'user02', 'xbq'],
     },
 
 };

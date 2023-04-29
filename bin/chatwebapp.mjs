@@ -37,9 +37,10 @@ if (fs.existsSync(settingsFile)) {
 }
 
 
-let chatGPTApiClient;
-let chatGPTProxyApiClientGpt4;
-let chatGPTProxyApiClientGpt3;
+let chatGPTApiClient35;
+let chatGPTApiClient40;
+let chatGPTProxyApiClientGpt35a;
+let chatGPTProxyApiClientGpt35b;
 let bingAIApiClient;
 
 const server = fastify();
@@ -55,26 +56,23 @@ await server.register(fastifyStatic, {
 console.log('serve the static web resources from the folder:', fs.realpathSync('./build'));
 
 server.post('/conversation', async (request, reply) => {
-	const acceptcode = request.headers['accept-code'];
-	let model = request.headers['model'];
-	if(!acceptcode || !model){
+	let acceptcode = request.headers['accept-code'];
+	const id = request.headers['user'];
+	const model = request.headers['model'];
+	let userKey = model;
+	if(!acceptcode || !id || !model){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
-	if(model=='bing-chat'||model=='bing-sydney'){
-		model = 'bing';
+	if(['bing-chat','bing-sydney','chatgpt-browser-3.5-1','chatgpt-browser-3.5-2'].includes(model)){
+		userKey='bing_chatgpt-browser';
 	}
-	if(!settings.apiOptions.perMessageClientOptionsWhitelist.validClientsToUse.includes(model)){
-		console.log('Unauthorized');
-		return reply.code(401).type('text/plain').send('Unauthorized');
-	}
-	let id;
 	try{
-		id=Buffer.from(acceptcode,'base64').toString('utf-8');
+		acceptcode=Buffer.from(acceptcode,'base64').toString('utf-8');
 	}catch(err){console.error(err)}
     console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
 	
-	if(!id||!settings.whiteList[model].includes(id)){
+	if(id!=acceptcode||!settings.whiteList[userKey].includes(id)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
@@ -93,12 +91,12 @@ server.post('/conversation', async (request, reply) => {
 	try{
 		//switch(settings.apiOptions.clientToUse){
 		switch(body.model){
-			case 'chatgpt':
-				if(!chatGPTApiClient){
-					chatGPTApiClient = new ChatGPTAPI({
+			case 'chatgpt-3.5':
+				if(!chatGPTApiClient35){
+					chatGPTApiClient35 = new ChatGPTAPI({
 						apiKey: settings.chatGptClient.openaiApiKey,
 						completionParams: {
-							model: settings.chatGptClient.modelOptions.model,
+							model: 'gpt-3.5-turbo', //settings.chatGptClient.modelOptions.model,
 							temperature: 1, //default to 0.8 in ChatGPTAPI.  What sampling temperature to use, between 0 and 2
 							top_p: 1,
 							presence_penalty: 1, //Number between -2.0 and 2.0
@@ -107,11 +105,27 @@ server.post('/conversation', async (request, reply) => {
 					//completionParams
 				    //https://platform.openai.com/docs/api-reference/chat/create
 				}
-				apiResponse = await chatGPTApiClient.sendMessage(body.q, {
+				apiResponse = await chatGPTApiClient35.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
 					parentMessageId: body.msgId,
 				  });
-
+/* response object:
+{
+  role: 'assistant',
+  id: 'chatcmpl-7AgZyIdc9l5lX1RsSG9FvcQCWcQ2J',
+  conversationId: undefined,
+  parentMessageId: 'acf6dcc8-55d2-4439-a74e-90b8049bea43',
+  text: 'I am ChatGPT, a large language model developed by OpenAI.',      
+  detail: {
+    id: 'chatcmpl-7AgZyIdc9l5lX1RsSG9FvcQCWcQ2J',
+    object: 'chat.completion',
+    created: 1682781310,
+    model: 'gpt-3.5-turbo-0301',
+    usage: { prompt_tokens: 61, completion_tokens: 15, total_tokens: 76 },
+    choices: [ [Object] ]
+  }
+} 
+*/
 				  result = {ts: body.ts, q: body.q, 
 					bot: 'GPT3.5',
 					msgId: apiResponse.id, //chatgpt, chatgpt-browser
@@ -119,14 +133,67 @@ server.post('/conversation', async (request, reply) => {
 					text: apiResponse.text, 
 					usage: apiResponse.detail && apiResponse.detail.usage ? apiResponse.detail.usage : undefined, //chatgpt
 				};
-	
+				//console.log('GPT3.5:', apiResponse, result);
 				break;
-			case 'chatgpt-browser;3.5':
-				if(!chatGPTProxyApiClientGpt3){
-					const gpt35Setting = {...settings.chatGptBrowserClient, model: 'text-davinci-002-render-sha'};
-					chatGPTProxyApiClientGpt3 = new ChatGPTBrowserClient(gpt35Setting);
+			case 'chatgpt-4':
+				result = {ts: body.ts, q: body.q,
+						  bot: 'GPT4',
+						  text: '暂时不可用!!! Temporarily unavailable!!!'
+						};
+				break;
+					if(!chatGPTApiClient40){
+						chatGPTApiClient40 = new ChatGPTAPI({
+							apiKey: settings.chatGptClient.openaiApiKey,
+							completionParams: {
+								model: 'gpt-4', //settings.chatGptClient.modelOptions.model,
+								temperature: 1, //default to 0.8 in ChatGPTAPI.  What sampling temperature to use, between 0 and 2
+								top_p: 1,
+								presence_penalty: 1, //Number between -2.0 and 2.0
+							},
+						  });
+						//completionParams
+						//https://platform.openai.com/docs/api-reference/chat/create
+					}
+					apiResponse = await chatGPTApiClient40.sendMessage(body.q, {
+						timeoutMs: 5 * 60 * 1000,
+						parentMessageId: body.msgId,
+					  });
+	/* response object:
+{
+  role: 'assistant',
+  id: 'chatcmpl-7AgVDInJ7nu6TilLqGyd6Nu3BOy2k',
+  conversationId: undefined,
+  parentMessageId: '9c9ec012-86f3-4b07-8f13-cdbd0a269fe1',
+  text: "I am ChatGPT, an AI language model created by OpenAI. I'm designed to understand and generate human-like responses to text-based questions or statements.",
+  detail: {
+    id: 'chatcmpl-7AgVDInJ7nu6TilLqGyd6Nu3BOy2k',
+    object: 'chat.completion',
+    created: 1682781015,
+    model: 'gpt-4-0314',
+    usage: { prompt_tokens: 59, completion_tokens: 32, total_tokens: 91 },
+    choices: [ [Object] ]
+  }
+}
+	*/
+
+					  result = {ts: body.ts, q: body.q, 
+						bot: 'GPT4',
+						msgId: apiResponse.id, //chatgpt, chatgpt-browser
+						conversationId: apiResponse.conversationId, //chatgpt-browser
+						text: apiResponse.text, 
+						usage: apiResponse.detail && apiResponse.detail.usage ? apiResponse.detail.usage : undefined, //chatgpt
+					};
+					//console.log('GPT4:', apiResponse, result);
+					break;
+			case 'chatgpt-browser-3.5-1':
+				if(!chatGPTProxyApiClientGpt35a){
+					const gpt35Setting = {...settings.chatGptBrowserClient,
+						model: 'text-davinci-002-render-sha',
+						reverseProxyUrl: settings.reverseProxyUrlsWorking[0]
+					};
+					chatGPTProxyApiClientGpt35a = new ChatGPTBrowserClient(gpt35Setting);
 				}
-				apiResponse = await chatGPTProxyApiClientGpt3.sendMessage(body.q, {
+				apiResponse = await chatGPTProxyApiClientGpt35a.sendMessage(body.q, {
 					timeoutMs: 5 * 60 * 1000,
 					conversationId: body.msgId && body.conversationId ? body.conversationId : undefined,
 					parentMessageId: body.msgId && body.conversationId ? body.msgId : undefined,
@@ -138,33 +205,28 @@ server.post('/conversation', async (request, reply) => {
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.response ?? apiResponse.text, 
 				};
-	
 				break;
-			case 'chatgpt-browser;4':
-				if(!chatGPTProxyApiClientGpt4){
-					// chatGPTProxyApiClient = new ChatGPTUnofficialProxyAPI({
-					// 	accessToken: settings.chatGptBrowserClient.accessToken,
-					// 	apiReverseProxyUrl: settings.chatGptBrowserClient.reverseProxyUrl,
-					//   });
-					//ChatGPTUnofficialProxyAPI has some bug, so change to use ChatGPTBrowserClient
-					//
-					const gpt40Setting = {...settings.chatGptBrowserClient, model: 'gpt-4'};
-					chatGPTProxyApiClientGpt4 = new ChatGPTBrowserClient(gpt40Setting);
-				}
-				apiResponse = await chatGPTProxyApiClientGpt4.sendMessage(body.q, {
-					timeoutMs: 5 * 60 * 1000,
-					conversationId: body.msgId && body.conversationId ? body.conversationId : undefined,
-					parentMessageId: body.msgId && body.conversationId ? body.msgId : undefined,
-				  });
-
-				result = {ts: body.ts, q: body.q,
-					bot: 'ChatGPT4',
-					msgId: apiResponse.messageId ?? apiResponse.id, 
-					conversationId: apiResponse.conversationId, //chatgpt-browser
-					text: apiResponse.response ?? apiResponse.text, 
-				};
+			case 'chatgpt-browser-3.5-2':
+					if(!chatGPTProxyApiClientGpt35b){
+						const gpt35Setting = {...settings.chatGptBrowserClient,
+							model: 'text-davinci-002-render-sha',
+							reverseProxyUrl: settings.reverseProxyUrlsWorking[1]
+						};
+						chatGPTProxyApiClientGpt35b = new ChatGPTBrowserClient(gpt35Setting);
+					}
+					apiResponse = await chatGPTProxyApiClientGpt35b.sendMessage(body.q, {
+						timeoutMs: 5 * 60 * 1000,
+						conversationId: body.msgId && body.conversationId ? body.conversationId : undefined,
+						parentMessageId: body.msgId && body.conversationId ? body.msgId : undefined,
+					  });
 	
-				break;
+					result = {ts: body.ts, q: body.q,
+						bot: 'ChatGPT3.5',
+						msgId: apiResponse.messageId ?? apiResponse.id, 
+						conversationId: apiResponse.conversationId, //chatgpt-browser
+						text: apiResponse.response ?? apiResponse.text, 
+					};
+					break;
 			case 'bing-chat':
 			case 'bing-sydney':
 				//https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/bin/server.js
@@ -215,8 +277,8 @@ server.post('/conversation', async (request, reply) => {
 				
 				break;
 			default:
-				console.error('settings.apiOptions.clientToUse is not defined in settings file!');
-				process.exit(1);
+				console.error('body.model is invalid!');
+				result = {bot: 'Bot(invalid body.model)'};
 		}
 				  
 		//log the usage for this id
@@ -235,7 +297,7 @@ server.post('/conversation', async (request, reply) => {
 		result = {ts: body.ts, error: error.message};
 
 		var filename=`${id}.log`;
-		var line = `{"ts":"${result.ts}", "ip":"${request.ip}", "error":"some error happened"},\n`;
+		var line = `{"ts":"${result.ts}", "ip":"${request.ip}", "error":${error.message}},\n`;
 		appendFile(filename, line, 'utf8')
 			.then(()=>console.log(line))
 			.catch(console.error);
@@ -254,7 +316,7 @@ server.listen({
     }
 });
 
-console.log(`[ChatGPT Web App] is running at http://${settings.apiOptions.host}:${settings.apiOptions.port}`)
+console.log(`[chat web app server] is running at http://${settings.apiOptions.host}:${settings.apiOptions.port}`)
 
 server.get('/ping', async (request) => `server time: ${(new Date()).toString()}\n\n\nclient ip: ${request.ip}`);
 const getTimeStamp = () => {
