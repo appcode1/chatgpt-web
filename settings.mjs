@@ -114,6 +114,7 @@ export default {
         // clientToUse: 'bing',
     },
 
+    logPath: './logs',
     //add more users to the whiteList:
     whiteList: {
         'bing_chatgpt-browser': ['public', 'user01', 'user02', 'xbq'],

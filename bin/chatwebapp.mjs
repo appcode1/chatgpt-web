@@ -36,6 +36,11 @@ if (fs.existsSync(settingsFile)) {
     process.exit(1);
 }
 
+const logpath=settings.logPath ? settings.logPath : './logs';
+
+if (!fs.existsSync(logpath)){
+    fs.mkdirSync(logpath);
+}
 
 let chatGPTApiClient35;
 let chatGPTApiClient40;
@@ -282,7 +287,7 @@ server.post('/conversation', async (request, reply) => {
 		}
 				  
 		//log the usage for this id
-		var filename=`${id}.log`;
+		var filename=`${logpath}/${id}.log`;
 		var line = `{"ts":"${result.ts}", "ip":"${request.ip}", "bot":"${result.bot}"`;
 		if(result.usage && result.usage.total_tokens){
 			line += `, "tokens":${result.usage.total_tokens}},\n`;
@@ -296,7 +301,7 @@ server.post('/conversation', async (request, reply) => {
 		console.error(error.message);
 		result = {ts: body.ts, error: error.message};
 
-		var filename=`${id}.log`;
+		var filename=`${logpath}/${id}.log`;
 		var line = `{"ts":"${result.ts}", "ip":"${request.ip}", "error":${error.message}},\n`;
 		appendFile(filename, line, 'utf8')
 			.then(()=>console.log(line))
