@@ -69,8 +69,8 @@ server.post('/conversation', async (request, reply) => {
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}
-	if(['bing-chat','bing-sydney','chatgpt-browser-3.5-1','chatgpt-browser-3.5-2'].includes(model)){
-		userKey='bing_chatgpt-browser';
+	if(['bing-chat','bing-sydney','chatgpt-web-1','chatgpt-web-2'].includes(model)){
+		userKey='bing_chatgpt-web';
 	}
 	try{
 		acceptcode=Buffer.from(acceptcode,'base64').toString('utf-8');
@@ -96,7 +96,7 @@ server.post('/conversation', async (request, reply) => {
 	try{
 		//switch(settings.apiOptions.clientToUse){
 		switch(body.model){
-			case 'chatgpt-3.5':
+			case 'gpt-3.5-turbo':
 				if(!chatGPTApiClient35){
 					chatGPTApiClient35 = new ChatGPTAPI({
 						apiKey: settings.chatGptClient.openaiApiKey,
@@ -140,7 +140,7 @@ server.post('/conversation', async (request, reply) => {
 				};
 				//console.log('GPT3.5:', apiResponse, result);
 				break;
-			case 'chatgpt-4':
+			case 'gpt-4':
 				result = {ts: body.ts, q: body.q,
 						  bot: 'GPT4',
 						  text: '暂时不可用!!! Temporarily unavailable!!!'
@@ -190,7 +190,7 @@ server.post('/conversation', async (request, reply) => {
 					};
 					//console.log('GPT4:', apiResponse, result);
 					break;
-			case 'chatgpt-browser-3.5-1':
+			case 'chatgpt-web-1':
 				if(!chatGPTProxyApiClientGpt35a){
 					const gpt35Setting = {...settings.chatGptBrowserClient,
 						model: 'text-davinci-002-render-sha',
@@ -205,13 +205,13 @@ server.post('/conversation', async (request, reply) => {
 				  });
 
 				result = {ts: body.ts, q: body.q,
-					bot: 'ChatGPT3.5',
+					bot: 'ChatGPT-1',
 					msgId: apiResponse.messageId ?? apiResponse.id, 
 					conversationId: apiResponse.conversationId, //chatgpt-browser
 					text: apiResponse.response ?? apiResponse.text, 
 				};
 				break;
-			case 'chatgpt-browser-3.5-2':
+			case 'chatgpt-web-2':
 					if(!chatGPTProxyApiClientGpt35b){
 						const gpt35Setting = {...settings.chatGptBrowserClient,
 							model: 'text-davinci-002-render-sha',
@@ -226,7 +226,7 @@ server.post('/conversation', async (request, reply) => {
 					  });
 	
 					result = {ts: body.ts, q: body.q,
-						bot: 'ChatGPT3.5',
+						bot: 'ChatGPT-2',
 						msgId: apiResponse.messageId ?? apiResponse.id, 
 						conversationId: apiResponse.conversationId, //chatgpt-browser
 						text: apiResponse.response ?? apiResponse.text, 
