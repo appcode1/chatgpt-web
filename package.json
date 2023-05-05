@@ -8,7 +8,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@waylaidwanderer/chatgpt-api": "^1.34.0",
+    "@waylaidwanderer/chatgpt-api": "^1.35.0",
     "bootstrap": "^5.2.3",
     "chatgpt": "^5.2.2",
     "dotenv": "^16.0.3",
@@ -23,7 +23,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "chatgptwebapp": "node bin/ChatGPTWebApp.mjs",
+    "chatwebapp": "node bin/chatwebapp.mjs",
     "mytestwebserver": "node bin/MyTestWebServer.js"
   },
   "eslintConfig": {
