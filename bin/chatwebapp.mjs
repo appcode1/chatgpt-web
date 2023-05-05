@@ -42,6 +42,20 @@ if (!fs.existsSync(logpath)){
     fs.mkdirSync(logpath);
 }
 
+const usersListFile = './users.json';
+if(!fs.existsSync(usersListFile)){
+	console.error('Error: ./users.json does not exist');
+	process.exit(1);
+}
+
+let usersList;
+try {
+	usersList = JSON.parse(fs.readFileSync(usersListFile, 'utf8'));
+}catch(err){
+	console.error(`Failed to parse the JSON data object in ${usersListFile}`);
+	process.exit(1);
+}
+
 let chatGPTApiClient35;
 let chatGPTApiClient40;
 let chatGPTProxyApiClientGpt35a;
@@ -77,7 +91,7 @@ server.post('/conversation', async (request, reply) => {
 	}catch(err){console.error(err)}
     console.log(`${id} - ${request.ip} - ${getTimeStamp()}`);
 	
-	if(id!=acceptcode||!settings.whiteList[userKey].includes(id)){
+	if(id!=acceptcode||!usersList||!usersList[userKey]||!usersList[userKey].includes(id)){
 		console.log('Unauthorized');
 		return reply.code(401).type('text/plain').send('Unauthorized');
 	}

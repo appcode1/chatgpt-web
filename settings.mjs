@@ -115,11 +115,4 @@ export default {
     },
 
     logPath: './logs',
-    //add more users to the whiteList:
-    whiteList: {
-        'bing_chatgpt-web': ['public', 'user01', 'user02', 'xbq'],
-        'gpt-3.5-turbo': ['public', 'user01', 'user02', 'xbq'],
-        'gpt-4': ['public', 'user01', 'user02', 'xbq'],
-    },
-
 };
