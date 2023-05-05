@@ -95,7 +95,7 @@ server.post('/conversation', async (request, reply) => {
 	let result;
 	try{
 		//switch(settings.apiOptions.clientToUse){
-		switch(body.model){
+		switch(model){
 			case 'gpt-3.5-turbo':
 				if(!chatGPTApiClient35){
 					chatGPTApiClient35 = new ChatGPTAPI({
@@ -141,11 +141,6 @@ server.post('/conversation', async (request, reply) => {
 				//console.log('GPT3.5:', apiResponse, result);
 				break;
 			case 'gpt-4':
-				result = {ts: body.ts, q: body.q,
-						  bot: 'GPT4',
-						  text: '暂时不可用!!! Temporarily unavailable!!!'
-						};
-				break;
 					if(!chatGPTApiClient40){
 						chatGPTApiClient40 = new ChatGPTAPI({
 							apiKey: settings.chatGptClient.openaiApiKey,
@@ -240,7 +235,7 @@ server.post('/conversation', async (request, reply) => {
 				}
 
 				let opts;
-				if(body.model === 'bing-sydney'){
+				if(model === 'bing-sydney'){
 					 //activate jailbreak mode for Bing
 					opts = {
 						jailbreakConversationId: !body.jailbreakConversationId ? true : body.jailbreakConversationId,
@@ -282,8 +277,8 @@ server.post('/conversation', async (request, reply) => {
 				
 				break;
 			default:
-				console.error('body.model is invalid!');
-				result = {bot: 'Bot(invalid body.model)'};
+				console.error('model is invalid!');
+				result = {bot: 'Bot(invalid model)'};
 		}
 				  
 		//log the usage for this id

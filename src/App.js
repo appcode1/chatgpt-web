@@ -195,7 +195,7 @@ function App() {
         //other failed status
         setConversation(updatedConversation.map(c => {
           if(c.ts === requestData.ts){
-            return {...c, text: `${res.status} - ${res.statusText}`};
+            return {...c, text: `${res.status} - ${res.statusText} - ${AIModel}`};
           }else {
             return c;
           }
@@ -205,7 +205,7 @@ function App() {
         if(res.status === 401){
         //Unauthorized
           setTimeout(()=>{
-            setSignInStatus(`Unauthorized user to ${AIModel}`);
+            setSignInStatus(`Unauthorized to use ${AIModel}`);
             setConversation([]);
           }, 3000);
         }
