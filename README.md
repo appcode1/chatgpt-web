@@ -69,9 +69,9 @@ create .env from the .env.example
 store the environment variables in .env
 
 ### Run the nodejs web server:
-`npm run chatgptwebapp` to start the nodejs ChatGPT web app
+`npm run chatwebapp` to start the nodejs ChatGPT web app
 
-`npm run mytestwebserver` to start the testing nodejs web server
+`npm run MyTestWebServer` to start the testing nodejs web server
 
 
 ### Test the web app
@@ -90,9 +90,9 @@ Firstly, install pm2 `pnpm install -g pm2`
 
 Then use pm2 to manage the service:
 
-start it: `pm2 start bin/ChatGPTWebApp.mjs`
+start it: `pm2 start bin/chatwebapp.mjs`
 
 check the list: `pm2 list`
 
-stop it: `pm2 stop ChatGPTWebApp`
+stop it: `pm2 stop chatwebapp`
 
