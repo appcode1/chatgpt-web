@@ -69,7 +69,7 @@ create .env from the .env.example
 store the environment variables in .env
 
 ### Run the nodejs web server:
-`npm run chatgptwebapp` to start the nodejs ChatGPT web app
+`npm run chatwebapp` to start the nodejs Chat web app
 
 `npm run mytestwebserver` to start the testing nodejs web server
 
