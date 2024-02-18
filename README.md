@@ -90,9 +90,9 @@ Firstly, install pm2 `pnpm install -g pm2`
 
 Then use pm2 to manage the service:
 
-start it: `pm2 start bin/ChatGPTWebApp.mjs`
+start it: `pm2 start bin/chatwebapp.mjs`
 
 check the list: `pm2 list`
 
-stop it: `pm2 stop ChatGPTWebApp`
+stop it: `pm2 stop chatwebapp`
 
